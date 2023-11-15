@@ -1,21 +1,21 @@
 {
-    "name": "base-bailey-memory",
+    "name": "base-meta-memory",
     "version": "1.0.0",
     "description": "",
     "main": "app.js",
     "scripts": {
-        "pre-copy": "cd .. && npm run  copy.lib base-baileys-memory",
+        "pre-copy": "cd .. && npm run  copy.lib base-meta-memory",
         "start": "node app.js"
     },
     "keywords": [],
     "dependencies": {
+        "body-parser": "^1.20.1",
+        "polka": "^0.5.2",
         "@bot-whatsapp/bot": "latest",
         "@bot-whatsapp/cli": "latest",
         "@bot-whatsapp/database": "latest",
         "@bot-whatsapp/provider": "latest",
-        "@bot-whatsapp/portal": "latest",
-        "@whiskeysockets/baileys": "^6.4.0",
-        "wa-sticker-formatter": "4.3.2"
+        "axios": "^1.2.1"
     },
     "devDependencies": {
         "eslint-plugin-bot-whatsapp": "latest",

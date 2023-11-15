@@ -1,22 +1,63 @@
-const fs = require('fs');
-const { createBot, createProvider, createFlow, addKeyword } = require('@bot-whatsapp/bot');
-const BaileysProvider = require('@bot-whatsapp/provider/baileys');
-const MockAdapter = require('@bot-whatsapp/database/mock');
+const { createBot, createProvider, createFlow, addKeyword } = require('@bot-whatsapp/bot')
 
-// Define la ruta del archivo de sesión
-const SESSION_FILE_PATH = './whatsapp-session.json';
+const MetaProvider = require('@bot-whatsapp/provider/meta')
+const MockAdapter = require('@bot-whatsapp/database/mock')
 
-// Crear el archivo de sesión si no existe
-if (!fs.existsSync(SESSION_FILE_PATH)) {
-    fs.writeFileSync(SESSION_FILE_PATH, '{}');
-}
+/**
+ * Aqui declaramos los flujos hijos, los flujos se declaran de atras para adelante, es decir que si tienes un flujo de este tipo:
+ *
+ *          Menu Principal
+ *           - SubMenu 1
+ *             - Submenu 1.1
+ *           - Submenu 2
+ *             - Submenu 2.1
+ *
+ * Primero declaras los submenus 1.1 y 2.1, luego el 1 y 2 y al final el principal.
+ */
 
-// Tus flujos de conversación adicionales
-// Asegúrate de definir estos flujos (flowDocs, flowGracias, flowTuto, flowDiscord)
-// ...
+const flowSecundario = addKeyword(['2', 'siguiente']).addAnswer(['📄 Aquí tenemos el flujo secundario'])
 
-const flowSecundario = addKeyword(['2', 'siguiente']).addAnswer(['📄 Aquí tenemos el flujo secundario']);
-// ... otros flujos ...
+const flowDocs = addKeyword(['doc', 'documentacion', 'documentación']).addAnswer(
+    [
+        '📄 Aquí encontras las documentación recuerda que puedes mejorarla',
+        'https://bot-whatsapp.netlify.app/',
+        '\n*2* Para siguiente paso.',
+    ],
+    null,
+    null,
+    [flowSecundario]
+)
+
+const flowTuto = addKeyword(['tutorial', 'tuto']).addAnswer(
+    [
+        '🙌 Aquí encontras un ejemplo rapido',
+        'https://bot-whatsapp.netlify.app/docs/example/',
+        '\n*2* Para siguiente paso.',
+    ],
+    null,
+    null,
+    [flowSecundario]
+)
+
+const flowGracias = addKeyword(['gracias', 'grac']).addAnswer(
+    [
+        '🚀 Puedes aportar tu granito de arena a este proyecto',
+        '[*opencollective*] https://opencollective.com/bot-whatsapp',
+        '[*buymeacoffee*] https://www.buymeacoffee.com/leifermendez',
+        '[*patreon*] https://www.patreon.com/leifermendez',
+        '\n*2* Para siguiente paso.',
+    ],
+    null,
+    null,
+    [flowSecundario]
+)
+
+const flowDiscord = addKeyword(['discord']).addAnswer(
+    ['🤪 Únete al discord', 'https://link.codigoencasa.com/DISCORD', '\n*2* Para siguiente paso.'],
+    null,
+    null,
+    [flowSecundario]
+)
 
 const flowPrincipal = addKeyword(['hola', 'ole', 'alo'])
     .addAnswer('🙌 Hola bienvenido a este *Chatbot*')
@@ -30,39 +71,24 @@ const flowPrincipal = addKeyword(['hola', 'ole', 'alo'])
         null,
         null,
         [flowDocs, flowGracias, flowTuto, flowDiscord]
-    );
+    )
 
 const main = async () => {
-    const adapterDB = new MockAdapter();
-    const adapterFlow = createFlow([flowPrincipal, flowSecundario]); // Asegúrate de incluir todos los flujos aquí
-    const adapterProvider = createProvider(BaileysProvider, {
-        auth: loadSession()
-    });
+    const adapterDB = new MockAdapter()
+    const adapterFlow = createFlow([flowPrincipal])
 
-    const bot = createBot({
+    const adapterProvider = createProvider(MetaProvider, {
+        jwtToken: 'jwtToken',
+        numberId: 'numberId',
+        verifyToken: 'verifyToken',
+        version: 'v16.0',
+    })
+
+    createBot({
         flow: adapterFlow,
         provider: adapterProvider,
         database: adapterDB,
-    });
-
-    bot.provider.on('authenticated', (session) => {
-        saveSession(session);
-    });
-
-    // Aquí puedes agregar más lógica o manejo de eventos según sea necesario
+    })
 }
 
-const saveSession = (session) => {
-    fs.writeFileSync(SESSION_FILE_PATH, JSON.stringify(session));
-}
-
-const loadSession = () => {
-    if (fs.existsSync(SESSION_FILE_PATH)) {
-        return JSON.parse(fs.readFileSync(SESSION_FILE_PATH, 'utf-8'));
-    }
-    return {}; // Retorna un objeto vacío si no hay sesión guardada
-}
-
-main().catch(error => {
-    console.error('Error al iniciar el bot:', error);
-});
+main()
