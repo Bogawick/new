@@ -4,8 +4,7 @@
     "description": "",
     "main": "app.js",
     "scripts": {
-        "pre-copy": "cd .. && npm run  copy.lib base-baileys-memory",
-        "whatsapp-web.js": "^latest",
+        "pre-copy": "cd .. && npm run copy.lib base-baileys-memory",
         "start": "set PORT=3001 && node app.js"
     },
     "keywords": [],
